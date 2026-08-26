@@ -3,8 +3,8 @@
 ## Cover
 - **Project title:** Predicting PM2.5 Surges During Winter Inversions
 - **Course, section, semester:** CSE437
-- **Group members:** (Your Name & ID), (Mate's Name & ID)
-- **GitHub repository link:** https://github.com/your-username/cse437-pm25-forecasting-6
+- **Group members:** Samiul Mahmud 22299398, Tanvir Ahmmad Jim 22299068
+- **GitHub repository link:** https://github.com/Prometheus2003/cse437-pm25-forecasting-6.git
 - **Date:** 3 September 2026
 
 ## Summary
@@ -12,7 +12,7 @@
 
 ---
 
-## 1. Problem and Dataset (User - 65%)
+## 1. Problem and Dataset 
 
 ### 1.1 Problem statement
 High concentrations of PM2.5 present severe health hazards. Predicting sudden accumulation (surges) versus dispersion allows for better public health warnings.
@@ -30,7 +30,7 @@ PM2.5 (continuous numerical, $\mu\text{g}/\text{m}^3$). It is highly skewed righ
 
 ---
 
-## 2. Data Handling and Preprocessing (User - 65%)
+## 2. Data Handling and Preprocessing 
 
 ### 2.1 Data quality audit
 *(Mate finds this out in Notebook 01)*
@@ -49,7 +49,7 @@ Scaled using StandardScaler during the PCA pipeline.
 
 ---
 
-## 3. Statistical Analysis (Mate - 35%)
+## 3. Statistical Analysis 
 
 ### 3.1 Descriptive statistics
 *(Fill from Notebook 01)*
@@ -62,7 +62,7 @@ Scaled using StandardScaler during the PCA pipeline.
 
 ---
 
-## 4. Feature Engineering (Mate - 35%)
+## 4. Feature Engineering 
 
 ### 4.1 Derived features
 Created lag features ($t-1, t-3, t-24$) and 24-hour rolling means to capture temporal dependence without data leakage. Calculated orthogonal wind vectors $u$ and $v$ from speed and direction. Cyclically encoded hour and month using sine/cosine.
@@ -78,7 +78,7 @@ Dropped highly collinear original temporal and spatial features.
 
 ---
 
-## 5. Modeling and Validation (User - 65%)
+## 5. Modeling and Validation 
 
 ### 5.1 Validation strategy
 Strict chronological split (Train: 2013-2015, Val: 2016, Test: 2017). Random split was avoided to prevent future data leakage. Used `TimeSeriesSplit` for CV.
@@ -95,7 +95,7 @@ Primary metric: Root Mean Squared Error (RMSE) to heavily penalize large predict
 
 ---
 
-## 6. Hyperparameter Tuning (User - 65%)
+## 6. Hyperparameter Tuning 
 
 ### 6.1 Search space
 - `n_estimators`: [50, 100, 200]
@@ -110,7 +110,7 @@ RandomizedSearchCV (10 iterations) with TimeSeriesSplit (3 folds).
 
 ---
 
-## 7. Results, Visualization and Error Analysis (User - 65%)
+## 7. Results, Visualization and Error Analysis 
 
 ### 7.1 Test set performance
 *(Table comparing Ridge and XGBoost on Test RMSE/MAE)*
@@ -128,13 +128,13 @@ RandomizedSearchCV (10 iterations) with TimeSeriesSplit (3 folds).
 
 ---
 
-## 8. Limitations and Next Steps (Mate - 35%)
+## 8. Limitations and Next Steps 
 *(Write about limitations, e.g. spatial interpolation between stations, exogenous variables like traffic data missing).*
 
 ---
 
-## 9. Contributions (Mate - 35%)
+## 9. Contributions 
 | Member | Student ID | Contribution |
 | :--- | :--- | :--- |
-| (Your Name) | (Your ID) | Repository setup, data preprocessing (handling NaNs, target shifting), model training (Ridge, XGBoost), hyperparameter tuning, model evaluation, and error analysis. Report Sections 1, 2, 5, 6, 7. |
-| (Mate Name) | (Mate ID) | Data audit, exploratory data analysis, visualizations, feature engineering (lags, PCA, cyclical encoding, wind vectors). Report Sections 3, 4, 8, 9. |
+| Samiul Mahmud | 22299398 | Repository setup, data preprocessing (handling NaNs, target shifting), model training (Ridge, XGBoost), hyperparameter tuning, model evaluation, and error analysis. Report Sections 1, 2, 5, 6, 7. |
+| Tanvir Ahmmad Jim | 22299068 | Data audit, exploratory data analysis, visualizations, feature engineering (lags, PCA, cyclical encoding, wind vectors). Report Sections 3, 4, 8, 9. |
