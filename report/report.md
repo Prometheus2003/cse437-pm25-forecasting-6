@@ -2,13 +2,13 @@
 
 ## Cover
 - **Project title:** Predicting PM2.5 Surges During Winter Inversions
-- **Course, section, semester:** CSE437
+- **CSE437, section 6 , semester:** Summer 2026
 - **Group members:** Samiul Mahmud 22299398, Tanvir Ahmmad Jim 22299068
 - **GitHub repository link:** https://github.com/Prometheus2003/cse437-pm25-forecasting-6.git
 - **Date:** 3 September 2026
 
 ## Summary
-*(Write this last after both you and your mate have run all notebooks. 150-200 words covering dataset, problem, targets, models, metric, and finding.)*
+
 
 ---
 
@@ -33,7 +33,7 @@ PM2.5 (continuous numerical, $\mu\text{g}/\text{m}^3$). It is highly skewed righ
 ## 2. Data Handling and Preprocessing 
 
 ### 2.1 Data quality audit
-*(Mate finds this out in Notebook 01)*
+*( finds this out in Notebook 01)*
 
 ### 2.2 Missing values
 We assumed missing values were due to sensor downtime. We used linear interpolation (up to 3 hours) for small gaps, and forward filling for larger gaps to preserve temporal continuity without leaking future data.
