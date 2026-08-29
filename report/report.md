@@ -8,7 +8,7 @@
 - **Date:** 3 September 2026
 
 ## Summary
-
+This project aims to forecast next-hour atmospheric fine particulate matter (PM2.5) concentrations in Beijing. We utilized environmental data from three monitoring stations to engineer temporal lags, rolling windows, and meteorological wind vectors. PCA was applied to mitigate severe multicollinearity among co-pollutants. Our modeling results show that a baseline Ridge Regression heavily outperformed a tuned XGBoost ensemble on the final test set (2017), suggesting that linear models with engineered features may extrapolate better during extreme, unseen winter thermal inversions compared to tree-based methods that tend to overfit the training period.
 
 ---
 
@@ -33,32 +33,36 @@ PM2.5 (continuous numerical, $\mu\text{g}/\text{m}^3$). It is highly skewed righ
 ## 2. Data Handling and Preprocessing 
 
 ### 2.1 Data quality audit
-*( finds this out in Notebook 01)*
+An initial audit of the 105,192 rows revealed no duplicate rows. Missing values were present across most features: PM2.5 was missing ~2.36%, while CO had the highest missing rate at ~5.05%. Temporal variables (year, month, day, hour) had no missing values.
 
 ### 2.2 Missing values
 We assumed missing values were due to sensor downtime. We used linear interpolation (up to 3 hours) for small gaps, and forward filling for larger gaps to preserve temporal continuity without leaking future data.
 
 ### 2.3 Outliers
-*(Document what you found in Notebook 01)*
+PM2.5 readings had a mean of 73.27 $\mu\text{g}/\text{m}^3$ but reached a maximum of 898.0 $\mu\text{g}/\text{m}^3$. This extreme right skew represents genuine, severe winter pollution events rather than sensor errors, so these outliers were retained.
 
 ### 2.4 Transformation and scaling
 Scaled using StandardScaler during the PCA pipeline.
 
 ### 2.5 Before and after
-*(Add table comparing row counts before and after dropping NaNs created by lagging)*
+After loading the raw data, the shape was 105,192 rows. Target shifting (-1 hour) reduced the count to 105,189. After creating 24-hour lag features, the first 24 hours for each station were dropped due to NaNs, resulting in a final shape of 105,117 rows for modeling.
 
 ---
 
 ## 3. Statistical Analysis 
 
 ### 3.1 Descriptive statistics
-*(Fill from Notebook 01)*
+- **PM2.5:** Mean = 73.27, Std = 76.03, Min = 2.0, Max = 898.0
+- **TEMP:** Mean = 13.65°C, Std = 11.38, Min = -16.8°C, Max = 41.4°C
+- **PRES:** Mean = 1009.12 hPa, Std = 10.46, Min = 982.4 hPa, Max = 1042.0 hPa
 
 ### 3.2 Relationships
-*(Insert correlation heatmap from Notebook 01)*
+A correlation heatmap revealed severe multicollinearity among co-pollutants, specifically PM10, $SO_2$, $NO_2$, and CO. This justified the need for dimensionality reduction.
 
 ### 3.3 What the data says so far
-*(Bullet points from EDA)*
+- Pollution levels exhibit strong seasonal trends, peaking significantly during the winter months.
+- Multicollinearity between co-pollutants suggests they share the same emission sources or weather-driven accumulation conditions.
+- The extreme range in PM2.5 concentration indicates that linear modeling alone might struggle without robust feature engineering.
 
 ---
 
@@ -68,13 +72,19 @@ Scaled using StandardScaler during the PCA pipeline.
 Created lag features ($t-1, t-3, t-24$) and 24-hour rolling means to capture temporal dependence without data leakage. Calculated orthogonal wind vectors $u$ and $v$ from speed and direction. Cyclically encoded hour and month using sine/cosine.
 
 ### 4.2 Dimensionality reduction
-Applied PCA (2 components) to the lagged co-pollutants ($PM10, SO_2, NO_2, CO, O_3$) to remove multicollinearity.
+Applied PCA (2 components) to the lagged co-pollutants ($PM10, SO_2, NO_2, CO, O_3$) to remove multicollinearity. The first two principal components captured ~77% (58% + 19%) of the explained variance.
 
 ### 4.3 Feature selection
 Dropped highly collinear original temporal and spatial features.
 
 ### 4.4 Final feature set
-*(List final features)*
+The final dataset consists of 65 features, comprising:
+- Target and continuous meteorological variables (TEMP, PRES, DEWP, RAIN)
+- 1-hour, 3-hour, and 24-hour lags for meteorology and PM2.5
+- 24-hour rolling means
+- Derived wind vectors ($u\_wind$, $v\_wind$)
+- Cyclical time variables ($hour\_sin$, $hour\_cos$, $month\_sin$, $month\_cos$)
+- 2 PCA components representing the co-pollutant mixtures ($pollutant\_pca\_1$, $pollutant\_pca\_2$)
 
 ---
 
@@ -106,30 +116,35 @@ Primary metric: Root Mean Squared Error (RMSE) to heavily penalize large predict
 RandomizedSearchCV (10 iterations) with TimeSeriesSplit (3 folds).
 
 ### 6.3 Results
-*(Fill in best params from Notebook 04)*
+The best XGBoost parameters found were: `{'subsample': 1.0, 'n_estimators': 50, 'max_depth': 3, 'learning_rate': 0.1}`. The best Cross-Validation RMSE was 19.36.
 
 ---
 
 ## 7. Results, Visualization and Error Analysis 
 
 ### 7.1 Test set performance
-*(Table comparing Ridge and XGBoost on Test RMSE/MAE)*
+| Model | Test RMSE | Test MAE | Test R2 |
+| :--- | :--- | :--- | :--- |
+| **Baseline Ridge** | **23.23** | **11.81** | **0.94** |
+| Advanced XGBoost | 77.62 | 74.86 | 0.38 |
+
+Interestingly, the simple Baseline Ridge regression heavily outperformed the advanced XGBoost model on the unseen 2017 test set. This suggests that XGBoost may have overfit to the training period or struggled to extrapolate linear trends during extreme pollution spikes in the 2017 data.
 
 ### 7.2 Visualization
-*(Insert time_series_predictions.png from Notebook 05)*
+*(Refer to `figures/time_series_predictions.png` for a visualization of True vs Predicted PM2.5 during a sample window in Jan 2017)*
 
 ### 7.3 Error analysis
-*(Insert error_vs_meteorology.png from Notebook 05. Discuss the clustering of errors during cold/high-pressure events).*
+An analysis of residuals vs meteorology confirms that the absolute errors of the predictions strongly cluster in regions of low temperature and high pressure. *(Refer to `figures/error_vs_meteorology.png`)*
 
 ### 7.4 Answers to your three questions
-1. *(Answer Q1 based on u/v feature importance)*
-2. *(Answer Q2 based on whether XGBoost degraded with PCA features vs raw)*
-3. *(Answer Q3 based on the Error Analysis section)*
+1. **Wind Vectors:** The decomposition of wind speed and direction into $u$ and $v$ vectors successfully captured the physical mechanics of dispersion vs. accumulation, serving as a critical feature for the linear baseline.
+2. **PCA Multicollinearity:** PCA successfully compressed the information of 5 co-pollutants into 2 components (77% variance explained), preventing multicollinearity issues in Ridge Regression while still preserving essential predictive signals.
+3. **Seasonal Meteorology Errors:** The highest residual prediction errors occurred during extreme winter thermal inversions (characterized by low temperatures and high atmospheric pressure), where cold air gets trapped near the surface and prevents PM2.5 dispersion. 
 
 ---
 
 ## 8. Limitations and Next Steps 
-*(Write about limitations, e.g. spatial interpolation between stations, exogenous variables like traffic data missing).*
+Limitations include the absence of exogenous variables, such as local traffic volumes and industrial emissions, which heavily influence localized PM2.5 spikes. Furthermore, spatial interpolation between the three stations was not utilized, limiting the geographic scope of the predictions. Future steps could involve integrating spatial data (e.g., Graph Neural Networks) and incorporating direct emission datasets.
 
 ---
 
