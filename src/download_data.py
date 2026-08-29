@@ -7,6 +7,7 @@ zip_path = "data/raw/data.zip"
 extract_path = "data/raw/"
 
 print("Downloading dataset...")
+os.makedirs(extract_path, exist_ok=True)
 urllib.request.urlretrieve(url, zip_path)
 print("Download complete. Extracting...")
 

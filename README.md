@@ -15,8 +15,23 @@ We are building a time-series regression model to predict atmospheric fine parti
 3. Under what seasonal meteorological conditions (such as winter thermal inversions) does the regression model exhibit its highest residual prediction errors, and why?
 
 ## How to Run
-1. Install dependencies: `pip install -r requirements.txt`
-2. Run notebooks sequentially:
+1. **Create and activate a virtual environment** (recommended):
+   ```bash
+   python -m venv .venv
+   # Windows:
+   .\.venv\Scripts\activate
+   # Mac/Linux:
+   source .venv/bin/activate
+   ```
+2. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Download the raw data**:
+   ```bash
+   python src/download_data.py
+   ```
+4. **Run notebooks sequentially**:
    - `notebooks/01_data_audit_and_eda.ipynb`
    - `notebooks/02_preprocessing.ipynb`
    - `notebooks/03_feature_engineering.ipynb`
