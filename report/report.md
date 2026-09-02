@@ -7,10 +7,9 @@
 - **GitHub repository link:** https://github.com/Prometheus2003/cse437-pm25-forecasting-6.git
 - **Date:** 3 September 2026
 
-## Summary
+# Summary
 This project aims to forecast next-hour atmospheric fine particulate matter (PM2.5) concentrations in Beijing. We utilized environmental data from three monitoring stations to engineer temporal lags, rolling windows, and meteorological wind vectors. PCA was applied to mitigate severe multicollinearity among co-pollutants. Our modeling results show that a baseline Ridge Regression heavily outperformed a tuned XGBoost ensemble on the final test set (2017), suggesting that linear models with engineered features may extrapolate better during extreme, unseen winter thermal inversions compared to tree-based methods that tend to overfit the training period.
 
----
 
 ## 1. Problem and Dataset 
 
@@ -28,7 +27,6 @@ PM2.5 (continuous numerical, $\mu\text{g}/\text{m}^3$). It is highly skewed righ
 2. Can feature selection and dimensionality reduction (PCA) resolve severe multicollinearity among co-pollutants ($SO_2, NO_2, CO, O_3$) without degrading the model's predictive power during sudden pollution surges?
 3. Under what seasonal meteorological conditions (such as winter thermal inversions) does the regression model exhibit its highest residual prediction errors, and why?
 
----
 
 ## 2. Data Handling and Preprocessing 
 
@@ -47,7 +45,6 @@ Scaled using StandardScaler during the PCA pipeline.
 ### 2.5 Before and after
 After loading the raw data, the shape was 105,192 rows. Target shifting (-1 hour) reduced the count to 105,189. After creating 24-hour lag features, the first 24 hours for each station were dropped due to NaNs, resulting in a final shape of 105,117 rows for modeling.
 
----
 
 ## 3. Statistical Analysis 
 
@@ -64,7 +61,6 @@ A correlation heatmap revealed severe multicollinearity among co-pollutants, spe
 - Multicollinearity between co-pollutants suggests they share the same emission sources or weather-driven accumulation conditions.
 - The extreme range in PM2.5 concentration indicates that linear modeling alone might struggle without robust feature engineering.
 
----
 
 ## 4. Feature Engineering 
 
@@ -86,7 +82,6 @@ The final dataset consists of 65 features, comprising:
 - Cyclical time variables ($hour\_sin$, $hour\_cos$, $month\_sin$, $month\_cos$)
 - 2 PCA components representing the co-pollutant mixtures ($pollutant\_pca\_1$, $pollutant\_pca\_2$)
 
----
 
 ## 5. Modeling and Validation 
 
@@ -103,7 +98,6 @@ Ridge Regression ($\alpha=1.0$).
 ### 5.4 Metrics
 Primary metric: Root Mean Squared Error (RMSE) to heavily penalize large prediction errors during pollution surges. Secondary: MAE.
 
----
 
 ## 6. Hyperparameter Tuning 
 
@@ -118,7 +112,6 @@ RandomizedSearchCV (10 iterations) with TimeSeriesSplit (3 folds).
 ### 6.3 Results
 The best XGBoost parameters found were: `{'subsample': 1.0, 'n_estimators': 50, 'max_depth': 3, 'learning_rate': 0.1}`. The best Cross-Validation RMSE was 19.36.
 
----
 
 ## 7. Results, Visualization and Error Analysis 
 
@@ -141,12 +134,10 @@ An analysis of residuals vs meteorology confirms that the absolute errors of the
 2. **PCA Multicollinearity:** PCA successfully compressed the information of 5 co-pollutants into 2 components (77% variance explained), preventing multicollinearity issues in Ridge Regression while still preserving essential predictive signals.
 3. **Seasonal Meteorology Errors:** The highest residual prediction errors occurred during extreme winter thermal inversions (characterized by low temperatures and high atmospheric pressure), where cold air gets trapped near the surface and prevents PM2.5 dispersion. 
 
----
 
 ## 8. Limitations and Next Steps 
 Limitations include the absence of exogenous variables, such as local traffic volumes and industrial emissions, which heavily influence localized PM2.5 spikes. Furthermore, spatial interpolation between the three stations was not utilized, limiting the geographic scope of the predictions. Future steps could involve integrating spatial data (e.g., Graph Neural Networks) and incorporating direct emission datasets.
 
----
 
 ## 9. Contributions 
 | Member | Student ID | Contribution |
