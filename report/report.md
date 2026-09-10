@@ -8,7 +8,7 @@
 - **Date:** 3 September 2026
 
 # Summary
-This project aims to forecast next-hour atmospheric fine particulate matter (PM2.5) concentrations in Beijing. We utilized environmental data from three monitoring stations to engineer temporal lags, rolling windows, and meteorological wind vectors. PCA was applied to mitigate severe multicollinearity among co-pollutants. Our modeling results show that a baseline Ridge Regression heavily outperformed a tuned XGBoost ensemble on the final test set (2017), suggesting that linear models with engineered features may extrapolate better during extreme, unseen winter thermal inversions compared to tree-based methods that tend to overfit the training period.
+This project aims to forecast next-hour atmospheric fine particulate matter (PM2.5) concentrations in Beijing. We utilized environmental data from three monitoring stations to engineer temporal lags, rolling windows, and meteorological wind vectors. PCA was applied to mitigate severe multicollinearity among co-pollutants. Our modeling results show that both a baseline Ridge Regression and a tuned XGBoost ensemble performed very similarly to a simple Persistence Baseline on the final test set (2017). This suggests that while feature engineering and advanced modeling capture some underlying dynamics, next-hour PM2.5 forecasting remains heavily dominated by the strong temporal autocorrelation of the current state, leaving only marginal room for predictive improvement.
 
 
 ## 1. Problem and Dataset 
@@ -88,8 +88,9 @@ The final dataset consists of 65 features, comprising:
 ### 5.1 Validation strategy
 Strict chronological split (Train: 2013-2015, Val: 2016, Test: 2017). Random split was avoided to prevent future data leakage. Used `TimeSeriesSplit` for CV.
 
-### 5.2 Baseline
-Ridge Regression ($\alpha=1.0$).
+### 5.2 Baselines
+1. Persistence Baseline: Predicts the current hour's PM2.5 for the next hour ($t+1 = t$).
+2. Ridge Regression ($\alpha=1.0$).
 
 ### 5.3 Model families
 1. Ridge Regression (Linear): Assumes linear relationships, robust to collinearity (though we mitigated this via PCA).
@@ -118,10 +119,11 @@ The best XGBoost parameters found were: `{'subsample': 1.0, 'n_estimators': 50, 
 ### 7.1 Test set performance
 | Model | Test RMSE | Test MAE | Test R2 |
 | :--- | :--- | :--- | :--- |
-| **Baseline Ridge** | **23.23** | **11.81** | **0.94** |
-| Advanced XGBoost | 77.62 | 74.86 | 0.38 |
+| Persistence Baseline | 24.17 | 11.60 | 0.94 |
+| Baseline Ridge | **23.23** | 11.81 | **0.94** |
+| Advanced XGBoost | 23.95 | **11.44** | **0.94** |
 
-Interestingly, the simple Baseline Ridge regression heavily outperformed the advanced XGBoost model on the unseen 2017 test set. This suggests that XGBoost may have overfit to the training period or struggled to extrapolate linear trends during extreme pollution spikes in the 2017 data.
+Interestingly, all models perform remarkably similarly to the simple Persistence Baseline (predicting current PM2.5 for the next hour) on the unseen 2017 test set, all achieving an R2 of 0.94. The Baseline Ridge achieves the best RMSE, heavily penalizing large errors, while XGBoost achieves the best MAE. This suggests that the next-hour PM2.5 concentration is heavily dominated by strong temporal autocorrelation, meaning advanced modeling only provides marginal improvements over the current state.
 
 ### 7.2 Visualization
 *(Refer to `figures/time_series_predictions.png` for a visualization of True vs Predicted PM2.5 during a sample window in Jan 2017)*
